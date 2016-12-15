@@ -168,6 +168,14 @@ public:
   virtual void              clear() = 0;
 
   /**
+   *  @brief  This function removes the first @a num bytes from the internal
+   *          buffer.
+   *
+   *  @param  num The number of bytes to remove.
+   */
+  virtual void              eraseNBytes(std::size_t num) = 0;
+
+  /**
    *  @brief  Replaces the existing content with given one.
    *  @param  buffer  A pointer to the byte array to use.
    *  @param  size    The size of @a buffer.
@@ -314,6 +322,14 @@ public:
   *          Making Buffer::size() return 0.
   */
   virtual void              clear() final;
+  
+  /**
+   *  @brief  This function removes the first @a num bytes from the internal
+   *          buffer.
+   *
+   *  @param  num The number of bytes to remove.
+   */
+  virtual void              eraseNBytes(std::size_t num) final;
 
   /**
   *  @brief  Replaces the existing content with given one.
@@ -333,6 +349,7 @@ public:
 
 private:
   std::vector<char>         _buffer;    /**< Internal buffer */
+  std::size_t               _pos;       /**< Current position in buffer */
 };
 
 } // namespace Sery
@@ -422,6 +439,18 @@ public:
    */
   Stream& readRaw(char* buffer, uint32 size);
 
+  /**
+   *  @brief  This overload of operator>> will deserialize an arithmetic type.
+   *  @param      stream  The stream to deserialize @a t from.
+   *  @param[out] t       The object to set .
+   *  @return *this.
+   *
+   *  @warning  Thanks to SFINAE, this function won't be available for
+   *            non-arithmetics types.
+   */
+  template <class T, enable_if_t<std::is_arithmetic<T>::value>* = nullptr>
+  friend Stream& operator>>(Stream& stream, T& t);
+
 public:
   /**
    *  @brief  Returns the endian used by the current Stream.
@@ -482,18 +511,6 @@ Stream& operator>>(Stream& stream, char*& str);
  */
 template <class T, enable_if_t<std::is_arithmetic<T>::value>* = nullptr>
 Stream& operator<<(Stream& stream, T t);
-
-/**
- *  @brief  This overload of operator>> will deserialize an arithmetic type.
- *  @param      stream  The stream to deserialize @a t from.
- *  @param[out] t       The object to set .
- *  @return *this.
- *
- *  @warning  Thanks to SFINAE, this function won't be available for
- *            non-arithmetics types.
- */
-template <class T, enable_if_t<std::is_arithmetic<T>::value>* = nullptr>
-Stream& operator>>(Stream& stream, T& t);
 
 } // namespace Sery
 
@@ -739,11 +756,13 @@ namespace Sery
 
 Buffer::Buffer()
   : _buffer()
+  , _pos(0)
 {
 }
 
 Buffer::Buffer(const char* buffer, std::size_t size)
   : _buffer(buffer, buffer + size)
+  , _pos(0)
 {
 }
 
@@ -759,22 +778,33 @@ void        Buffer::writeRaw(const char* buffer, std::size_t size)
 void        Buffer::readRaw(char* buffer, std::size_t size)
 {
   memcpy(buffer, _buffer.data(), size);
-  _buffer.erase(_buffer.begin(), _buffer.begin() + size);
+  eraseNBytes(size);
 }
 
 std::size_t Buffer::size() const
 {
-  return _buffer.size();
+  return _buffer.size() - _pos;
 }
 
 const char* Buffer::data() const
 {
-  return _buffer.data();
+  return _buffer.data() + _pos;
 }
 
 void        Buffer::clear()
 {
+  _pos = 0;
   _buffer.clear();
+}
+
+void        Buffer::eraseNBytes(std::size_t num)
+{
+  _pos += num;
+  if (_pos >= _buffer.size() / 2 && _pos > 32)
+  {
+    _buffer.erase(_buffer.begin(), _buffer.begin() + _pos);
+    _pos = 0;
+  }
 }
 
 void        Buffer::setContent(const char* buffer, std::size_t size)
@@ -907,8 +937,7 @@ Stream&   operator>>(Stream& stream, T& t)
 {
   Endian  softwareEndian  = detail::getSoftwareEndian();
   Endian  currentEndian   = stream.getLocalEndian();
-  char    buffer[sizeof(T)];
-  stream.readRaw(buffer, sizeof(T));
+  const char* buffer = stream._buffer.data();
 
   uint8*  p = reinterpret_cast<uint8*>(&t);
 
@@ -922,6 +951,7 @@ Stream&   operator>>(Stream& stream, T& t)
       *p++ = buffer[sizeof(T) - index - 1];
   }
 
+  stream._buffer.eraseNBytes(sizeof(T));
   return stream;
 }
 

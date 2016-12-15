@@ -72,7 +72,7 @@ int main(int ac, char** av)
     stream >> triangle;
     triangles.push_back(triangle);
   }
-  std::cout << "Parsing done.\n";
-  std::cin.get();
+  std::cout << "Parsing done (" << triangles.size() << ").\n";
+  //std::cin.get();
   return 0;
 }
