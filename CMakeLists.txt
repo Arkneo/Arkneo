@@ -8,7 +8,7 @@ set(ARKNEO_CMAKE_FOLDER_PATH ${CMAKE_CURRENT_LIST_DIR}/CMake)
 
 # Configuration variables
 set(ENABLE_SOURCE_GROUPING true CACHE BOOL "Enable source subfolders")
-set(GLM_ROOT "${CMAKE_CURRENT_LIST_DIR}/Dependencies/glm" CACHE PATH "Path to GLM root directory")
+set(SFML_ROOT "${CMAKE_CURRENT_LIST_DIR}/Dependencies/install/SFML" CACHE PATH "Path to SFML root directory")
 
 # Source File (*.cpp)
 set(ARKNEO_SOURCE_FILES
@@ -17,7 +17,6 @@ set(ARKNEO_SOURCE_FILES
 
 # Headers File (*.hh, *.hpp)
 set(ARKNEO_HEADER_FILES
-    Sery_Amalgamated.hh
 )
 
 set(CMAKE_MODULE_PATH ${ARKNEO_CMAKE_FOLDER_PATH}/Modules ${CMAKE_MODULE_PATH})
@@ -39,9 +38,12 @@ prefix_custom_list(ARKNEO_SOURCE_PATHS "${ARKNEO_SOURCES_PATH}/" ARKNEO_SOURCE_F
 add_executable(Arkneo ${ARKNEO_SOURCE_PATHS} ${ARKNEO_HEADER_PATHS})
 include_directories(Arkneo ${ARKNEO_INCLUDES_PATH})
 
-# Find GLM
-find_package(GLM REQUIRED)
-include_directories(Arkneo ${GLM_INCLUDE_DIR})
+# Find SFML
+find_package(SFML REQUIRED COMPONENTS system window graphics)
+if (SFML_FOUND)
+    include_directories(${SFML_INCLUDE_DIR})
+    target_link_libraries(Arkneo ${SFML_LIBRARIES})
+endif (SFML_FOUND)
 
 if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -W -Wall -Wextra -O3")
@@ -59,4 +61,9 @@ if (WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_CURRENT_LIST_DIR}/Files"
             ${CMAKE_BINARY_DIR}/Files)
+    
+    add_custom_command(TARGET Arkneo POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${SFML_BINARIES}
+            $<TARGET_FILE_DIR:Arkneo>)
 endif(WIN32)
