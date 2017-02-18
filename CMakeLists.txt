@@ -12,12 +12,17 @@ set(GLM_ROOT "${CMAKE_CURRENT_LIST_DIR}/Dependencies/glm" CACHE PATH "Path to GL
 
 # Source File (*.cpp)
 set(ARKNEO_SOURCE_FILES
+    STL.cpp
+    Serialization.cpp
     main.cpp
 )
 
 # Headers File (*.hh, *.hpp)
 set(ARKNEO_HEADER_FILES
     Sery_Amalgamated.hh
+    STL.hh
+    Serialization.hh
+    Triangle.hh
 )
 
 set(CMAKE_MODULE_PATH ${ARKNEO_CMAKE_FOLDER_PATH}/Modules ${CMAKE_MODULE_PATH})
