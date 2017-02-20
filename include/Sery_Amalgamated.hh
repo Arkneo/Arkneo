@@ -449,7 +449,27 @@ public:
    *            non-arithmetics types.
    */
   template <class T, enable_if_t<std::is_arithmetic<T>::value>* = nullptr>
-  friend Stream& operator>>(Stream& stream, T& t);
+  friend Stream& operator>>(Stream& stream, T& t)
+  {
+    Endian  softwareEndian = detail::getSoftwareEndian();
+    Endian  currentEndian = stream.getLocalEndian();
+    const char* buffer = stream._buffer.data();
+
+    uint8*  p = reinterpret_cast<uint8*>(&t);
+
+    for (size_t index = 0;
+         index < sizeof(T);
+         ++index)
+    {
+      if (currentEndian == softwareEndian)
+        *p++ = buffer[index];
+      else
+        *p++ = buffer[sizeof(T) - index - 1];
+    }
+
+    stream._buffer.eraseNBytes(sizeof(T));
+    return stream;
+  }
 
 public:
   /**
@@ -932,28 +952,7 @@ template Stream& operator<< <double>      (Stream& , double);
 template Stream& operator<< <long double> (Stream& , long double);
 
 // Templates for deserializing arithmetics types
-template <class T, enable_if_t<std::is_arithmetic<T>::value>*>
-Stream&   operator>>(Stream& stream, T& t)
-{
-  Endian  softwareEndian  = detail::getSoftwareEndian();
-  Endian  currentEndian   = stream.getLocalEndian();
-  const char* buffer = stream._buffer.data();
-
-  uint8*  p = reinterpret_cast<uint8*>(&t);
-
-  for (size_t index = 0;
-       index < sizeof(T);
-       ++index)
-  {
-    if (currentEndian == softwareEndian)
-      *p++ = buffer[index];
-    else
-      *p++ = buffer[sizeof(T) - index - 1];
-  }
-
-  stream._buffer.eraseNBytes(sizeof(T));
-  return stream;
-}
+// Must be defined in class
 
 // Explicit instantiations of templates functions
 template Stream& operator>> <int8>        (Stream&, int8&);
