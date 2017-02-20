@@ -4,6 +4,7 @@
 #include <glm/geometric.hpp>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 STL::STL(const std::string& path)
 {

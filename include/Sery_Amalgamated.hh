@@ -449,27 +449,7 @@ public:
    *            non-arithmetics types.
    */
   template <class T, enable_if_t<std::is_arithmetic<T>::value>* = nullptr>
-  friend Stream& operator>>(Stream& stream, T& t)
-  {
-    Endian  softwareEndian = detail::getSoftwareEndian();
-    Endian  currentEndian = stream.getLocalEndian();
-    const char* buffer = stream._buffer.data();
-
-    uint8*  p = reinterpret_cast<uint8*>(&t);
-
-    for (size_t index = 0;
-         index < sizeof(T);
-         ++index)
-    {
-      if (currentEndian == softwareEndian)
-        *p++ = buffer[index];
-      else
-        *p++ = buffer[sizeof(T) - index - 1];
-    }
-
-    stream._buffer.eraseNBytes(sizeof(T));
-    return stream;
-  }
+    Stream& operator>>(T& t);
 
 public:
   /**
@@ -952,20 +932,43 @@ template Stream& operator<< <double>      (Stream& , double);
 template Stream& operator<< <long double> (Stream& , long double);
 
 // Templates for deserializing arithmetics types
-// Must be defined in class
+  template <class T, enable_if_t<std::is_arithmetic<T>::value>*>
+  Stream& Stream::operator>>(T& t)
+  {
+    Stream& stream = *this;
+    Endian  softwareEndian = detail::getSoftwareEndian();
+    Endian  currentEndian = stream.getLocalEndian();
+    const char* buffer = stream._buffer.data();
 
+    uint8*  p = reinterpret_cast<uint8*>(&t);
+
+    for (size_t index = 0;
+         index < sizeof(T);
+         ++index)
+    {
+      if (currentEndian == softwareEndian)
+        *p++ = buffer[index];
+      else
+        *p++ = buffer[sizeof(T) - index - 1];
+    }
+
+    stream._buffer.eraseNBytes(sizeof(T));
+    return stream;
+  }
+
+  
 // Explicit instantiations of templates functions
-template Stream& operator>> <int8>        (Stream&, int8&);
-template Stream& operator>> <int16>       (Stream&, int16&);
-template Stream& operator>> <int32>       (Stream&, int32&);
-template Stream& operator>> <int64>       (Stream&, int64&);
-template Stream& operator>> <uint8>       (Stream&, uint8&);
-template Stream& operator>> <uint16>      (Stream&, uint16&);
-template Stream& operator>> <uint32>      (Stream&, uint32&);
-template Stream& operator>> <uint64>      (Stream&, uint64&);
-template Stream& operator>> <float>       (Stream&, float&);
-template Stream& operator>> <double>      (Stream&, double&);
-template Stream& operator>> <long double> (Stream&, long double&);
+  template Stream& Stream::operator>> <int8>        (int8&);
+  template Stream& Stream::operator>> <int16>       (int16&);
+  template Stream& Stream::operator>> <int32>       (int32&);
+  template Stream& Stream::operator>> <int64>       (int64&);
+  template Stream& Stream::operator>> <uint8>       (uint8&);
+  template Stream& Stream::operator>> <uint16>      (uint16&);
+  template Stream& Stream::operator>> <uint32>      (uint32&);
+  template Stream& Stream::operator>> <uint64>      (uint64&);
+  template Stream& Stream::operator>> <float>       (float&);
+  template Stream& Stream::operator>> <double>      (double&);
+  template Stream& Stream::operator>> <long double> (long double&);
 
 // (De)Serialization of C-Style strings
 Stream&   operator<<(Stream& stream, const char* str)
