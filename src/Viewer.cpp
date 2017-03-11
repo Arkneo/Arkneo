@@ -89,10 +89,7 @@ void			Viewer::setBuffer()
     {
       for (int count = 0; count < 3; ++count)
 	{
-	  glm::vec3 vertex;
-	  vertex.x = tri.v[count].x;
-	  vertex.y = tri.v[count].y;
-	  vertex.z = tri.v[count].z;
+	  glm::vec3 vertex(tri.v[count].x, tri.v[count].y, tri.v[count].z);
 	  g_vertex_buffer_data.push_back(vertex);
 	}
     }
@@ -104,25 +101,16 @@ void			Viewer::setBuffer()
       if (tri.match)
         {
           for (int count = 0; count < 3; ++count) {
-	    glm::vec3 vertex;
-	    vertex.x = 1.000f;
-	    vertex.y = 0.000f;
-	    vertex.z = 0.000f;
+	    glm::vec3 vertex(1.000f, 0.000f, 0.000f);
 	    g_color_buffer_data.push_back(vertex);
           }
         }
       else
         {
-	  if (color == 0.850f)
-            color = 1.000;
-          else
-	  color = 0.850;
-          for (int count = 0; count < 9; ++count)
+	  color = (color == 0.850f) ? 1.000f : 0.850f;
+	  for (int count = 0; count < 9; ++count)
 	    {
-	      glm::vec3 vertex;
-	      vertex.x = color;
-	      vertex.y = color;
-	      vertex.z = color;
+	      glm::vec3 vertex(color, color, color);
 	      g_color_buffer_data.push_back(vertex);
 	    }
         }
