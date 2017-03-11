@@ -15,6 +15,8 @@ set(ARKNEO_SOURCE_FILES
     STL.cpp
     Serialization.cpp
     main.cpp
+    shader.cpp
+    Viewer.cpp
 )
 
 # Headers File (*.hh, *.hpp)
@@ -23,6 +25,8 @@ set(ARKNEO_HEADER_FILES
     STL.hh
     Serialization.hh
     Triangle.hh
+    shader.hpp
+    Viewer.hh
 )
 
 set(CMAKE_MODULE_PATH ${ARKNEO_CMAKE_FOLDER_PATH}/Modules ${CMAKE_MODULE_PATH})
@@ -50,6 +54,7 @@ include_directories(Arkneo ${GLM_INCLUDE_DIR})
 
 if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -W -Wall -Wextra -O3")
+  target_link_libraries(Arkneo glfw3 GL GLU X11 Xi dl GLEW Xrandr Xxf86vm Xinerama Xcursor rt m pthread)
 endif (UNIX)
 
 # Copies the config and media files

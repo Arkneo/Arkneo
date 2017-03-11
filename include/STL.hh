@@ -31,6 +31,7 @@ public:
    *          Range les voisins de chaque triangle par longueur croissante.
    */
   void  setupNeighbors();
+  const std::vector<Triangle>  &getTriangle();
 
 private:
   std::vector<Triangle> _triangles;
