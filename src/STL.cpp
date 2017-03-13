@@ -12,6 +12,11 @@ STL::STL(const std::string& path)
     parseFile(path);
 }
 
+const std::vector<Triangle>	&STL::getTriangle()
+{
+  return _triangles;
+}
+
 void STL::parseFile(const std::string& path)
 {
   Sery::Buffer  buffer;
@@ -102,8 +107,14 @@ void STL::setupNeighbors()
     }
   }
 
+  int i = 0;
   // On trie les voisins par longueur croissante
   for (Triangle& tri : _triangles)
-    std::sort(tri.neighbors.begin(), tri.neighbors.end(),
-              [] (auto a, auto b) {return a.second < b.second; });
+    {
+      std::sort(tri.neighbors.begin(), tri.neighbors.end(),
+		[] (auto a, auto b) {return a.second < b.second; });
+      if (i < _triangles.size() / 2)
+	tri.match = true;
+      ++i;
+    }
 }

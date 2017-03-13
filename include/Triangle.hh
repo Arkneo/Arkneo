@@ -23,6 +23,7 @@ struct Triangle
   glm::vec3     v[3];           /**< Les trois vertex du triangle */
   Sery::uint16  attribute;      /**< Attribute extrait du fichier STL. Ignoré. */
   size_t        lastIndex = 0;  /**< Dernier index de neighbors disponible */
+  bool		match = false;
 };
 
 #endif // ARKNEO_TRIANGLE_HH_
