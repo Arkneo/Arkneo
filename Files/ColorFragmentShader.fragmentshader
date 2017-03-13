@@ -2,17 +2,22 @@
 
 // Interpolated values from the vertex shaders
 in vec3 fragmentColor;
+in vec3 ec_pos;
 
 // Ouput data
 out vec3 color;
 
-void main(){
+void main()
+{
+    vec3 base3 = fragmentColor;
+    vec3 base2 = fragmentColor - vec3(0.17, 0.15, 0.16);
+    vec3 base00 = fragmentColor - vec3(0.6, 0.6, 0.6);
 
-	// Output color = color specified in the vertex shader, 
-	// interpolated between all 3 surrounding vertices
-	vec3 base3 = vec3(0.99, 0.96, 0.89);
-	vec3 base2 = vec3(0.92, 0.91, 0.83);
-    	vec3 base00 = vec3(0.40, 0.48, 0.51);
-	color = fragmentColor * base3;
+    vec3 ec_normal = normalize(cross(dFdx(ec_pos), dFdy(ec_pos)));
+    ec_normal = normalize(ec_normal);
 
+    float a = dot(ec_normal, vec3(0.0, 0.0, 1.0));
+    float b = dot(ec_normal, vec3(-0.57, -0.57, 0.57));
+
+    color = (a*base2 + (1-a)*base00)*0.5 + (b*base3 + (1-b)*base00)*0.5;
 }
