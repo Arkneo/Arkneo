@@ -22,9 +22,24 @@ public:
 
 public:
   /**
-   *  @brief  Lis le fichier STL path et stocke les données en interne.
+   *  @brief  Lit le fichier STL path et stocke les données en interne.
    */
   void  parseFile(const std::string& path);
+
+  /**
+   *  @brief  Charge les voisins depuis le fichier spécifié
+   */
+  void  loadNeighborsFromFile(const std::string& path);
+
+  /**
+   *  @brief  Calcule les voisins en parcourant les triangles
+   */
+  void  calculateNeighbors(const std::string& path = "");
+  
+  /**
+   *  @brief  Stocke les voisins dans un fichier
+   */
+  void  serializeNeighbors(const std::string& path) const;
 
   /**
    *  @brief  Parcoure tous les triangles et met les voisins à jour.
@@ -36,6 +51,7 @@ public:
 private:
   std::vector<Triangle> _triangles;
   std::array<uint8, 80> _header;
+  std::string           _path;
 };
 
 #endif // ARKNEO_STL_HH_

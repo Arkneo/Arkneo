@@ -5,8 +5,12 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
 
 STL::STL(const std::string& path)
+  : _path(path)
 {
   if (!path.empty())
     parseFile(path);
@@ -51,7 +55,59 @@ void STL::parseFile(const std::string& path)
   std::cout << "[DEBUG] Parsing terminé.\n";
 }
 
-void STL::setupNeighbors()
+void  STL::loadNeighborsFromFile(const std::string& path)
+{
+  Sery::Buffer  buffer;
+  Sery::Stream  stream(buffer, Sery::BigEndian);
+
+  std::ifstream file(path, std::ofstream::binary);
+
+  if (!file.is_open())
+  {
+    std::cout << "[ERROR] Impossible d'ouvrir le fichier `" << path << "`.\n";
+    return;
+  }
+  auto          lambda = [&file] (char* buf, int size) {
+    file.read(buf, size);
+  };
+
+  size_t size = sizeof(size_t) + 3 * (sizeof(size_t) + sizeof(float));
+  Sery::readToBuffer(lambda, buffer, size * _triangles.size());
+  file.close();
+
+  for (Triangle& tri : _triangles)
+  {
+    stream >> tri.lastIndex;
+    stream >> std::get<0>(tri.neighbors[0]) >> std::get<2>(tri.neighbors[0]);
+    std::get<1>(tri.neighbors[0]) = &_triangles.at(std::get<0>(tri.neighbors[0]));
+
+    stream >> std::get<0>(tri.neighbors[1]) >> std::get<2>(tri.neighbors[1]);
+    std::get<1>(tri.neighbors[1]) = &_triangles.at(std::get<0>(tri.neighbors[1]));
+
+    stream >> std::get<0>(tri.neighbors[2]) >> std::get<2>(tri.neighbors[2]);
+    std::get<1>(tri.neighbors[2]) = &_triangles.at(std::get<0>(tri.neighbors[2]));
+  }
+}
+
+void  STL::serializeNeighbors(const std::string& path) const
+{
+  Sery::Buffer  buffer;
+  Sery::Stream  stream(buffer, Sery::BigEndian);
+
+  for (const Triangle& tri : _triangles)
+  {
+    stream << tri.lastIndex;
+    stream << std::get<0>(tri.neighbors[0]) << std::get<2>(tri.neighbors[0]);
+    stream << std::get<0>(tri.neighbors[1]) << std::get<2>(tri.neighbors[1]);
+    stream << std::get<0>(tri.neighbors[2]) << std::get<2>(tri.neighbors[2]);
+  }
+
+  std::ofstream file(path, std::ofstream::binary);
+  file.write(buffer.data(), buffer.size());
+  file.close();
+}
+
+void  STL::calculateNeighbors(const std::string& path)
 {
   for (size_t i = 0; i < _triangles.size(); ++i)
   {
@@ -93,11 +149,13 @@ void STL::setupNeighbors()
       // Si on a trouvé un segment commun, on met à jour les voisins
       if (dist > 0)
       {
-        tri.neighbors[tri.lastIndex].first = &tri2;
-        tri.neighbors[tri.lastIndex].second = dist;
+        std::get<0>(tri.neighbors[tri.lastIndex]) = j;
+        std::get<1>(tri.neighbors[tri.lastIndex]) = &tri2;
+        std::get<2>(tri.neighbors[tri.lastIndex]) = dist;
         tri.lastIndex++;
-        tri2.neighbors[tri2.lastIndex].first = &tri;
-        tri2.neighbors[tri2.lastIndex].second = dist;
+        std::get<0>(tri.neighbors[tri2.lastIndex]) = i;
+        std::get<1>(tri2.neighbors[tri2.lastIndex]) = &tri;
+        std::get<2>(tri2.neighbors[tri2.lastIndex]) = dist;
         tri2.lastIndex++;
 
         // Si le triangle a trois voisins, on passe au suivant.
@@ -107,14 +165,40 @@ void STL::setupNeighbors()
     }
   }
 
-  int i = 0;
+  size_t i = 0;
   // On trie les voisins par longueur croissante
   for (Triangle& tri : _triangles)
+  {
+    std::sort(tri.neighbors.begin(), tri.neighbors.end(),
+              [] (auto a, auto b) { return std::get<2>(a) < std::get<2>(b); });
+    ++i;
+  }
+
+  if (!path.empty())
+    serializeNeighbors(path);
+}
+
+void STL::setupNeighbors()
+{
+  if (!_path.empty())
+  {
+    fs::path path(_path);
+    fs::path neighborsPath(path.parent_path() / (path.stem().string() + ".arkneig"));
+    if (fs::exists(neighborsPath))
     {
-      std::sort(tri.neighbors.begin(), tri.neighbors.end(),
-		[] (auto a, auto b) {return a.second < b.second; });
-      if (i < _triangles.size() / 2)
-	tri.match = true;
-      ++i;
+      std::cout << "Loading neighbors from `" << neighborsPath << "`\n";
+      loadNeighborsFromFile(neighborsPath.string());
+      std::cout << "Neighbors loading done\n";
+      return;
     }
+    else
+    {
+      std::cout << "Calculating and writing neighbors to `" << neighborsPath << "`\n";
+      calculateNeighbors(neighborsPath.string());
+      std::cout << "Neighbors calculation done, written.\n";
+      return;
+    }
+  }
+  else
+    calculateNeighbors();
 }

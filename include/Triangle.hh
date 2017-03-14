@@ -5,6 +5,7 @@
 
 #include <glm/vec3.hpp>
 #include <array>
+#include <tuple>
 
 /**
  *  @brief  Structure représentant un triangle 3D
@@ -18,7 +19,7 @@ struct Triangle
    *          Le second membre de la pairse est la longueur du segment
    *          partagé avec le voisin.
    */
-  std::array<std::pair<Triangle*, float>, 3> neighbors;
+  std::array<std::tuple<size_t, Triangle*, float>, 3> neighbors;
   glm::vec3     normal;         /**< Vecteur normal du triangle */
   glm::vec3     v[3];           /**< Les trois vertex du triangle */
   Sery::uint16  attribute;      /**< Attribute extrait du fichier STL. Ignoré. */
