@@ -17,6 +17,7 @@ set(ARKNEO_SOURCE_FILES
     main.cpp
     shader.cpp
     Viewer.cpp
+    AngleGen.cpp
 )
 
 # Headers File (*.hh, *.hpp)
@@ -27,6 +28,7 @@ set(ARKNEO_HEADER_FILES
     Triangle.hh
     shader.hpp
     Viewer.hh
+    AngleGen.hh
 )
 
 set(CMAKE_MODULE_PATH ${ARKNEO_CMAKE_FOLDER_PATH}/Modules ${CMAKE_MODULE_PATH})

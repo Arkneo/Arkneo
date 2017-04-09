@@ -14,10 +14,10 @@ int main(int ac, char** av)
   std::string filePath2{"./Files/boule_disco1/demibouleafacette2.stl"};
 
   if (ac > 2)
-    {
-      filePath1 = av[1];
-      filePath2 = av[2];
-    }
+  {
+    filePath1 = av[1];
+    filePath2 = av[2];
+  }
 
   STL stl1(filePath1);
   stl1.setupNeighbors();

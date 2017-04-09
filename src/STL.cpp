@@ -1,5 +1,6 @@
 #include "STL.hh"
 #include "Serialization.hh"
+#include "AngleGen.hh"
 
 #include <glm/geometric.hpp>
 #include <fstream>
@@ -71,21 +72,21 @@ void  STL::loadNeighborsFromFile(const std::string& path)
     file.read(buf, size);
   };
 
-  size_t size = sizeof(size_t) + 3 * (sizeof(size_t) + sizeof(float));
+  size_t size = sizeof(size_t) + 3 * sizeof(Triangle::NeighborData);
   Sery::readToBuffer(lambda, buffer, size * _triangles.size());
   file.close();
 
   for (Triangle& tri : _triangles)
   {
     stream >> tri.lastIndex;
-    stream >> std::get<0>(tri.neighbors[0]) >> std::get<2>(tri.neighbors[0]);
-    std::get<1>(tri.neighbors[0]) = &_triangles.at(std::get<0>(tri.neighbors[0]));
+    stream >> tri.neighbors[0].index >> tri.neighbors[0].length >> tri.neighbors[0].angle;
+    tri.neighbors[0].triangle = &_triangles.at(tri.neighbors[0].index);
 
-    stream >> std::get<0>(tri.neighbors[1]) >> std::get<2>(tri.neighbors[1]);
-    std::get<1>(tri.neighbors[1]) = &_triangles.at(std::get<0>(tri.neighbors[1]));
+    stream >> tri.neighbors[1].index >> tri.neighbors[1].length >> tri.neighbors[1].angle;
+    tri.neighbors[1].triangle = &_triangles.at(tri.neighbors[1].index);
 
-    stream >> std::get<0>(tri.neighbors[2]) >> std::get<2>(tri.neighbors[2]);
-    std::get<1>(tri.neighbors[2]) = &_triangles.at(std::get<0>(tri.neighbors[2]));
+    stream >> tri.neighbors[2].index >> tri.neighbors[2].length >> tri.neighbors[2].angle;
+    tri.neighbors[2].triangle = &_triangles.at(tri.neighbors[2].index);
   }
 }
 
@@ -97,9 +98,9 @@ void  STL::serializeNeighbors(const std::string& path) const
   for (const Triangle& tri : _triangles)
   {
     stream << tri.lastIndex;
-    stream << std::get<0>(tri.neighbors[0]) << std::get<2>(tri.neighbors[0]);
-    stream << std::get<0>(tri.neighbors[1]) << std::get<2>(tri.neighbors[1]);
-    stream << std::get<0>(tri.neighbors[2]) << std::get<2>(tri.neighbors[2]);
+    stream << tri.neighbors[0].index << tri.neighbors[0].length << tri.neighbors[0].angle;
+    stream << tri.neighbors[1].index << tri.neighbors[1].length << tri.neighbors[1].angle;
+    stream << tri.neighbors[2].index << tri.neighbors[2].length << tri.neighbors[2].angle;
   }
 
   std::ofstream file(path, std::ofstream::binary);
@@ -149,13 +150,16 @@ void  STL::calculateNeighbors(const std::string& path)
       // Si on a trouvé un segment commun, on met à jour les voisins
       if (dist > 0)
       {
-        std::get<0>(tri.neighbors[tri.lastIndex]) = j;
-        std::get<1>(tri.neighbors[tri.lastIndex]) = &tri2;
-        std::get<2>(tri.neighbors[tri.lastIndex]) = dist;
+        float angle = AngleGen::getAngle(tri, tri2);
+        tri.neighbors[tri.lastIndex].index = j;
+        tri.neighbors[tri.lastIndex].triangle = &tri2;
+        tri.neighbors[tri.lastIndex].length = dist;
+        tri.neighbors[tri.lastIndex].angle = angle;
         tri.lastIndex++;
-        std::get<0>(tri.neighbors[tri2.lastIndex]) = i;
-        std::get<1>(tri2.neighbors[tri2.lastIndex]) = &tri;
-        std::get<2>(tri2.neighbors[tri2.lastIndex]) = dist;
+        tri2.neighbors[tri2.lastIndex].index = i;
+        tri2.neighbors[tri2.lastIndex].triangle = &tri;
+        tri2.neighbors[tri2.lastIndex].length = dist;
+        tri2.neighbors[tri2.lastIndex].angle = angle;
         tri2.lastIndex++;
 
         // Si le triangle a trois voisins, on passe au suivant.
@@ -170,7 +174,7 @@ void  STL::calculateNeighbors(const std::string& path)
   for (Triangle& tri : _triangles)
   {
     std::sort(tri.neighbors.begin(), tri.neighbors.end(),
-              [] (auto a, auto b) { return std::get<2>(a) < std::get<2>(b); });
+              [] (auto a, auto b) { return a.length < b.length; });
     ++i;
   }
 
