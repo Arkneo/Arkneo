@@ -1,0 +1,25 @@
+on set :
+tab_res = {total, tri1, tri2} * nbr_res
+res_min = seuil de validation d'un angle (en %)
+
+pour un triangle tri1 de l'objet 1 on definit un total
+{
+	pour un triangle tri2 de l'objet 2
+	somme = 0;
+	pour chaque coté (i de 0 a 2)
+	{
+		diff = val_abs(tri1.ang[i] - tri2.ang[i]);
+		res = 100 - (diff / 180) * 100;
+		if (res > res_min)
+		{
+			somme += res;
+			on fait la même opération avec tri1.neighbor[i] et tri2.neighbor[i];
+		}
+	}
+	if (somme > 0)
+		total += somme;
+}
+
+suivant le total qu'on récupere, on le place dans le tableau
+avec les 2 triangles tri1 et tri2.
+(si total = 0 ou total exite deja dans le tableau on le met pas)
