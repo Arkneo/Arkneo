@@ -78,10 +78,20 @@ void	FirstRec(Triangle *tri1, Triangle *tri2, std::vector<t_res> &res)
     }
 }
 
+void	AllTri1(Triangle *tri1, Triangle *tri2, std::vector<t_res> &res)
+{
+  FirstRec(tri1, tri2, res);
+  for (int i = 0; i < 3; i++)
+    {
+      if (tri1->neighbors[i].triangle->alreadyPassed1 == false)
+	AllTri1(tri1->neighbors[i].triangle, tri2, res);
+    }
+}
+
 std::vector<t_res> const &	BruteForcer(Triangle tri1, Triangle tri2)
 {
   std::vector<t_res>		res;
 
-  FirstRec(&tri1, &tri2, res);
+  AllTri1(&tri1, &tri2, res);
   return (res);
 }
