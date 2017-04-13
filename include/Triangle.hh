@@ -26,6 +26,8 @@ struct Triangle
    *          Le second membre de la pairse est la longueur du segment
    *          partagé avec le voisin.
    */
+  bool		alreadyPassed2 = false;
+  bool		alreadyPassed1 = false;
   std::array<NeighborData, 3> neighbors;
   glm::vec3     normal;         /**< Vecteur normal du triangle */
   glm::vec3     v[3];           /**< Les trois vertex du triangle */

@@ -18,6 +18,7 @@ set(ARKNEO_SOURCE_FILES
     shader.cpp
     Viewer.cpp
     AngleGen.cpp
+    algo.cpp
 )
 
 # Headers File (*.hh, *.hpp)
@@ -29,6 +30,7 @@ set(ARKNEO_HEADER_FILES
     shader.hpp
     Viewer.hh
     AngleGen.hh
+    BruteForcer.hpp
 )
 
 set(CMAKE_MODULE_PATH ${ARKNEO_CMAKE_FOLDER_PATH}/Modules ${CMAKE_MODULE_PATH})
@@ -55,8 +57,8 @@ find_package(GLM REQUIRED)
 include_directories(Arkneo ${GLM_INCLUDE_DIR})
 
 if (UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -W -Wall -Wextra -O3")
-  target_link_libraries(Arkneo glfw3 GL GLU X11 Xi dl GLEW Xrandr Xxf86vm Xinerama Xcursor rt m pthread)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -W -Wall -Wextra -O3 -g3")
+  target_link_libraries(Arkneo stdc++fs glfw GL GLU X11 Xi dl GLEW Xrandr Xxf86vm Xinerama Xcursor rt m pthread)
 endif (UNIX)
 
 # Copies the config and media files
