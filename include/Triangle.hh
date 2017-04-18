@@ -31,9 +31,9 @@ struct Triangle
   std::array<NeighborData, 3> neighbors;
   glm::vec3     normal;         /**< Vecteur normal du triangle */
   glm::vec3     v[3];           /**< Les trois vertex du triangle */
+  glm::vec3	color = {0.85f, 0.85f, 0.85f};
   Sery::uint16  attribute;      /**< Attribute extrait du fichier STL. Ignoré. */
   size_t        lastIndex = 0;  /**< Dernier index de neighbors disponible */
-  bool		    match = false;
 };
 
 #endif // ARKNEO_TRIANGLE_HH_

@@ -10,16 +10,20 @@ bool				sortResult(const t_res &elem1,
 
 bool				verifyNeighbor1(Triangle *tri)
 {
-  return (tri->neighbors[0].triangle->alreadyPassed1
-	  && tri->neighbors[1].triangle->alreadyPassed1
-	  && tri->neighbors[2].triangle->alreadyPassed1);
+  if (tri->neighbors[0].triangle->alreadyPassed1 &&
+      tri->neighbors[1].triangle->alreadyPassed1 &&
+      tri->neighbors[2].triangle->alreadyPassed1)
+    return (true);
+  return (false);
 }
 
 bool				verifyNeighbor2(Triangle *tri)
 {
-  return (tri->neighbors[0].triangle->alreadyPassed2
-	  && tri->neighbors[1].triangle->alreadyPassed2
-	  && tri->neighbors[2].triangle->alreadyPassed2);
+  if (tri->neighbors[0].triangle->alreadyPassed2 &&
+      tri->neighbors[1].triangle->alreadyPassed2 &&
+      tri->neighbors[2].triangle->alreadyPassed2)
+    return (true);
+  return (false);
 }
 
 void	ForcerRec(Triangle *tri1,
@@ -88,10 +92,36 @@ void	AllTri1(Triangle *tri1, Triangle *tri2, std::vector<t_res> &res)
     }
 }
 
+void	setColor(std::vector<t_res> &res)
+{
+  int len = res.size();
+  float colorValue = 1.0f;
+
+  for (int i = 0; i < len; i++)
+    {
+      if (i <= len / 3)
+	{
+	  res[i].tri1->color = {0.0f, 0.0f, colorValue};
+	  res[i].tri2->color = {0.0f, 0.0f, colorValue};
+	}
+      if (i <= len / 2)
+	{
+	  res[i].tri1->color = {0.0f, colorValue, 0.0f};
+	  res[i].tri2->color = {0.0f, colorValue, 0.0f};
+	}
+      else
+	{
+	  res[i].tri1->color = {colorValue, 0.0f, 0.0f};
+	  res[i].tri2->color = {colorValue, 0.0f, 0.0f};
+	}
+    }
+}
+
 std::vector<t_res> const &	BruteForcer(Triangle tri1, Triangle tri2)
 {
   std::vector<t_res>		res;
 
   AllTri1(&tri1, &tri2, res);
+  setColor(res);
   return (res);
 }

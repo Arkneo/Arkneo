@@ -51,7 +51,7 @@ int			Viewer::createWindow()
       return -1;
     }
   glfwMakeContextCurrent(window);
-  
+
   glewExperimental = true;
   if (glewInit() != GLEW_OK)
     {
@@ -85,35 +85,22 @@ void			Viewer::init()
 void			Viewer::setBuffer()
 {
   std::vector<glm::vec3>	g_vertex_buffer_data;
-  for(const Triangle& tri : _triangles)
+  for(const Triangle &tri : _triangles)
     {
       for (int count = 0; count < 3; ++count)
-    {
-      glm::vec3 vertex(tri.v[count].x, tri.v[count].y, tri.v[count].z);
-      g_vertex_buffer_data.push_back(vertex);
+	{
+	  glm::vec3 vertex(tri.v[count].x, tri.v[count].y, tri.v[count].z);
+	  g_vertex_buffer_data.push_back(vertex);
+	}
     }
-    }
-
-  float color = 0.850f;
   std::vector<glm::vec3>	 g_color_buffer_data;
   for (const Triangle &tri : _triangles)
     {
-      if (tri.match)
-        {
-          for (int count = 0; count < 3; ++count) {
-        glm::vec3 vertex(1.000f, 0.000f, 0.000f);
-        g_color_buffer_data.push_back(vertex);
-          }
-        }
-      else
-        {
-      color = (color == 0.850f) ? 1.000f : 0.850f;
-      for (int count = 0; count < 9; ++count)
-        {
-          glm::vec3 vertex(color, color, color);
-          g_color_buffer_data.push_back(vertex);
-        }
-        }
+      for (int count = 0; count < 3; ++count)
+	{
+	  glm::vec3 vertex(tri.color);
+	  g_color_buffer_data.push_back(vertex);
+	}
     }
 
   glGenBuffers(1, &vertexbuffer);
@@ -127,20 +114,20 @@ void			Viewer::setBuffer()
 
 void			Viewer::setZoom(float deltaTime)
 {
-  // Direction : Spherical coordinates to Cartesian coordinates conversion                                                                                                                   
+  // Direction : Spherical coordinates to Cartesian coordinates conversion
   glm::vec3 direction(
-              cos(verticalAngle) * sin(horizontalAngle),
-              sin(verticalAngle),
-              cos(verticalAngle) * cos(horizontalAngle)
-              );
+		      cos(verticalAngle) * sin(horizontalAngle),
+		      sin(verticalAngle),
+		      cos(verticalAngle) * cos(horizontalAngle)
+		      );
 
   if (_type == 1)
     {
       if (glfwGetKey( window, GLFW_KEY_O ) == GLFW_PRESS){
-    position += direction * deltaTime * speed;
+	position += direction * deltaTime * speed;
       }
       if (glfwGetKey( window, GLFW_KEY_L ) == GLFW_PRESS){
-    position -= direction * deltaTime * speed;
+	position -= direction * deltaTime * speed;
       }
     }
   else
@@ -153,14 +140,14 @@ void			Viewer::setZoom(float deltaTime)
       }
     }
   float FoV = initialFoV;
-  
-  // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units                                                                                                
+
+  // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
   ProjectionMatrix = glm::perspective(glm::radians(FoV), 4.0f / 3.0f, 0.1f, 100.0f);
   ViewMatrix = glm::lookAt(
-               position,
-               position+direction,
-               glm::vec3( 0, 1, 0 )
-               );
+			   position,
+			   position+direction,
+			   glm::vec3( 0, 1, 0 )
+			   );
 }
 
 /* set vertex and color attributes */
@@ -169,25 +156,25 @@ void			Viewer::setAttributes()
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
   glVertexAttribPointer(
-            0,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            0,       
-            (void*)0 
-            );
+			0,
+			3,
+			GL_FLOAT,
+			GL_FALSE,
+			0,
+			(void*)0
+			);
 
   glEnableVertexAttribArray(1);
   glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
   glVertexAttribPointer(
-            1,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            0,       
-            (void*)0 
-            );
- }
+			1,
+			3,
+			GL_FLOAT,
+			GL_FALSE,
+			0,
+			(void*)0
+			);
+}
 
 /* Rotation keys for first stl */
 void			Viewer::generateRotation1(float deltaTime)
@@ -249,19 +236,19 @@ int			Viewer::buildView()
     else
       generateRotation2(deltaTime);
 
-    // Build the model matrix                                                                                                  
+    // Build the model matrix
     glm::mat4 RotationMatrix = glm::eulerAngleYXZ(Orientation.y, Orientation.x, Orientation.z);
     glm::mat4 TranslationMatrix = translate(glm::mat4(), Position);
     glm::mat4 ScalingMatrix = scale(glm::mat4(), glm::vec3(1.0f, 1.0f, 1.0f));
     glm::mat4 ModelMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;
     glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
-   // Send our transformation to the currently bound shader,                                                                  
-   // in the "MVP" uniform                                                                                                    
+   // Send our transformation to the currently bound shader,
+   // in the "MVP" uniform
    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
    glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
-    
+
     // Draw the triangle !
     glDrawArrays(GL_TRIANGLES, 0, _bufferSize);
     glDisableVertexAttribArray(0);
@@ -270,12 +257,12 @@ int			Viewer::buildView()
     // Swap buffers
     glfwSwapBuffers(window);
     glfwPollEvents();
-    
+
   }
   // Check if the ESC key was pressed or the window was closed
   while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
      glfwWindowShouldClose(window) == 0 );
-  
+
   // Cleanup VBO and shader
   glDeleteBuffers(1, &vertexbuffer);
   glDeleteBuffers(1, &colorbuffer);
@@ -283,6 +270,6 @@ int			Viewer::buildView()
   glDeleteVertexArrays(1, &VertexArrayID);
 
   glfwTerminate();
-  
+
   return 0;
 }
