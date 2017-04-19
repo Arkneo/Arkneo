@@ -117,11 +117,32 @@ void	setColor(std::vector<t_res> &res)
     }
 }
 
+void	rec_color(Triangle *tri1, Triangle *tri2)
+{
+  tri1->color = {1.0f, 0.0f, 0.0f};
+  tri2->color = {1.0f, 0.0f, 0.0f};
+  for (int i = 0; i < 3; i++)
+    {
+      double diff = std::abs(tri1->neighbors[i].angle - tri2->neighbors[i].angle);
+      double res = 100 - (diff / 180) *100;
+      if (res > RES_MIN)
+        {
+	  if (tri1->neighbors[i].triangle->color[0] != 1.0f && tri2->neighbors[i].triangle->color[0] != 1.0f)
+	    rec_color(tri1->neighbors[i].triangle, tri2->neighbors[i].triangle);
+        }
+    }
+}
+
+void	color_all(std::vector<t_res> &res)
+{
+  rec_color(res[0].tri1, res[0].tri2);
+}
+
 std::vector<t_res> const &	BruteForcer(Triangle tri1, Triangle tri2)
 {
   std::vector<t_res>		res;
 
   AllTri1(&tri1, &tri2, res);
-  setColor(res);
+  color_all(res);
   return (res);
 }
