@@ -36,6 +36,7 @@ void	ForcerRec(Triangle *tri1,
   tri2->alreadyPassed2 = true;
   for (int i = 0; i < 3; i++)
     {
+      //boucle for avec j pour l'objet 2 (surement a ajouter)
       double diff = std::abs(tri1->neighbors[i].angle - tri2->neighbors[i].angle);
       double res = 100 - (diff / 180) *100;
       if (res > RES_MIN)
@@ -59,8 +60,8 @@ void	FirstRec(Triangle *tri1, Triangle *tri2, std::vector<t_res> &res)
   for (int i = 0; i < 3; i++)
     {
       tot = 0.0f;
-      ForcerRec(tri1, tri2, tot);
-      if (tot > 0)
+      ForcerRec(tri1, tri2, tot);    //pour un triangle1 et un triangle2, étend au max la zone de matching
+      if (tot > 0)                   //si la zone atteint un minimum, on ajoute le resultat au tableau
 	{
 	  t_res	tmp;
 
@@ -72,19 +73,19 @@ void	FirstRec(Triangle *tri1, Triangle *tri2, std::vector<t_res> &res)
 	  std::sort(res.begin(), res.end(), sortResult);
 	  if (res.size() > NBR_RES)
 	    res.pop_back();
-	    }
+	}
       if (tri2->neighbors[i].triangle->alreadyPassed1 == false)
-	FirstRec(tri1, tri2->neighbors[i].triangle, res);
+	FirstRec(tri1, tri2->neighbors[i].triangle, res);  //passe au triangle2 suivant
     }
 }
 
 void	AllTri1(Triangle *tri1, Triangle *tri2, std::vector<t_res> &res)
 {
-  FirstRec(tri1, tri2, res);
+  FirstRec(tri1, tri2, res);   //pour un triangle1, regarde tous les triangles2
   for (int i = 0; i < 3; i++)
     {
       if (tri1->neighbors[i].triangle->alreadyPassed1 == false)
-	AllTri1(tri1->neighbors[i].triangle, tri2, res);
+	AllTri1(tri1->neighbors[i].triangle, tri2, res);   //passe au triangle1 suivant
     }
 }
 
@@ -141,7 +142,7 @@ std::vector<t_res> const &	BruteForcer(Triangle tri1, Triangle tri2)
 {
   std::vector<t_res>		res;
 
-  AllTri1(&tri1, &tri2, res);
+  AllTri1(&tri1, &tri2, res);     //passe par tous les triangles1
   color_all(res);
   return (res);
 }
