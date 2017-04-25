@@ -37,6 +37,7 @@ void	ForcerRec(Triangle *tri1,
   for (int i = 0; i < 3; i++)
     {
       //boucle for avec j pour l'objet 2 (surement a ajouter)
+      //changer les calculs si on ajoute le patch des angles (regarder si la somme fait 360)
       double diff = std::abs(tri1->neighbors[i].angle - tri2->neighbors[i].angle);
       double res = 100 - (diff / 180) *100;
       if (res > RES_MIN)
@@ -70,7 +71,7 @@ void	FirstRec(Triangle *tri1, Triangle *tri2, std::vector<t_res> &res)
 	  tmp.tri2 = tri2;
 
 	  res.push_back(tmp);
-	  std::sort(res.begin(), res.end(), sortResult);
+	  std::sort(res.begin(), res.end(), sortResult); //tri le tableau par ordre decroissant
 	  if (res.size() > NBR_RES)
 	    res.pop_back();
 	}
@@ -120,7 +121,7 @@ void	rec_color(Triangle *tri1, Triangle *tri2)
   tri2->color = {1.0f, 0.0f, 0.0f};
   for (int i = 0; i < 3; i++)
     {
-      for (int j = 0; j < 3; j++)
+      for (int j = 0; j < 3; j++) //double boucle pour test si c'est mieux
 	{
 	  double diff = std::abs(tri1->neighbors[i].angle - tri2->neighbors[j].angle);
 	  double res = 100 - (diff / 180) *100;
