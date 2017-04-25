@@ -57,7 +57,7 @@ find_package(GLM REQUIRED)
 include_directories(Arkneo ${GLM_INCLUDE_DIR})
 
 if (UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -W -Wall -Wextra -O3 -g3")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -W -Wall -Wextra -O3")
   target_link_libraries(Arkneo stdc++fs glfw GL GLU X11 Xi dl GLEW Xrandr Xxf86vm Xinerama Xcursor rt m pthread)
 endif (UNIX)
 

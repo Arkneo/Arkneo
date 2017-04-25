@@ -1,7 +1,7 @@
 #ifndef BRUTEFORCER_HPP_
 # define BRUTEFORCER_HPP_
 
-# define RES_MIN 90.0f
+# define RES_MIN 99.9f
 # define NBR_RES 10
 
 #include <vector>
@@ -9,7 +9,7 @@
 
 typedef struct	s_res
 {
-  int		tot;
+  float		tot;
   Triangle	*tri1;
   Triangle	*tri2;
 }		t_res;

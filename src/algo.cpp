@@ -5,7 +5,7 @@
 bool				sortResult(const t_res &elem1,
 					   const t_res &elem2)
 {
-  return (elem1.tot < elem2.tot);
+  return (elem1.tot > elem2.tot);
 }
 
 bool				verifyNeighbor1(Triangle *tri)
@@ -28,9 +28,8 @@ bool				verifyNeighbor2(Triangle *tri)
 
 void	ForcerRec(Triangle *tri1,
 		  Triangle *tri2,
-		  int &tot)
+		  float &tot)
 {
-  //printf("DEBUG\n%f\n", tri2->neighbors[0].length);
   if (verifyNeighbor2(tri1) && verifyNeighbor2(tri2))
     return ;
   tri1->alreadyPassed2 = true;
@@ -39,7 +38,6 @@ void	ForcerRec(Triangle *tri1,
     {
       double diff = std::abs(tri1->neighbors[i].angle - tri2->neighbors[i].angle);
       double res = 100 - (diff / 180) *100;
-      //printf("%f %i\n", res, i);
       if (res > RES_MIN)
 	{
 	  tot += res;
@@ -51,17 +49,16 @@ void	ForcerRec(Triangle *tri1,
 
 void	FirstRec(Triangle *tri1, Triangle *tri2, std::vector<t_res> &res)
 {
-  static int	tot = 0;
+  float	tot;
   static int	debug = 0;
 
-  //printf("DEBUG\n%f\n", tri2->neighbors[0].length);
   if (verifyNeighbor1(tri1) && verifyNeighbor1(tri2))
     return ;
   tri1->alreadyPassed1 = true;
   tri2->alreadyPassed1 = true;
   for (int i = 0; i < 3; i++)
     {
-      tot = 0;
+      tot = 0.0f;
       ForcerRec(tri1, tri2, tot);
       if (tot > 0)
 	{
@@ -76,7 +73,6 @@ void	FirstRec(Triangle *tri1, Triangle *tri2, std::vector<t_res> &res)
 	  if (res.size() > NBR_RES)
 	    res.pop_back();
 	    }
-      //printf("index: %i\n", debug++);
       if (tri2->neighbors[i].triangle->alreadyPassed1 == false)
 	FirstRec(tri1, tri2->neighbors[i].triangle, res);
     }
@@ -123,13 +119,16 @@ void	rec_color(Triangle *tri1, Triangle *tri2)
   tri2->color = {1.0f, 0.0f, 0.0f};
   for (int i = 0; i < 3; i++)
     {
-      double diff = std::abs(tri1->neighbors[i].angle - tri2->neighbors[i].angle);
-      double res = 100 - (diff / 180) *100;
-      if (res > RES_MIN)
-        {
-	  if (tri1->neighbors[i].triangle->color[0] != 1.0f && tri2->neighbors[i].triangle->color[0] != 1.0f)
-	    rec_color(tri1->neighbors[i].triangle, tri2->neighbors[i].triangle);
-        }
+      for (int j = 0; j < 3; j++)
+	{
+	  double diff = std::abs(tri1->neighbors[i].angle - tri2->neighbors[j].angle);
+	  double res = 100 - (diff / 180) *100;
+	  if (res > RES_MIN)
+	    {
+	      if (tri1->neighbors[i].triangle->color[0] != 1.0f || tri2->neighbors[j].triangle->color[0] != 1.0f)
+		rec_color(tri1->neighbors[i].triangle, tri2->neighbors[j].triangle);
+	    }
+	}
     }
 }
 
