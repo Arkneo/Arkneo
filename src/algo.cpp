@@ -43,7 +43,7 @@ void	ForcerRec(Triangle *tri1,
 	{
 	  tot += res;
 	  if (tri1->neighbors[i].triangle->alreadyPassed2 == false && tri2->neighbors[i].triangle->alreadyPassed2 == false)
-	    ForcerRec(tri1->neighbors[i].triangle, tri2->neighbors[i].triangle, tot);
+	    ForcerRec(tri1->neighbors[i].triangle, tri2->neighbors[i].triangle, tot); //on etend la zone
 	}
     }
 }
